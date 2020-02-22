@@ -1,11 +1,14 @@
-const Koa = require('koa');
-const Router = require('koa-router');
-const bodyparser = require('koa-bodyparser')
+const Router = require('koa-router')
+const router = new Router()
+const { index } = require('../controllers/home')
 
-const app = new Koa();
-const router = new Router();
-// 前缀实现
-const usersRouter = new Router({ prefix: '/users'});
+// router.get('/', (ctx) => {
+//     ctx.body = '<h1>这是首页</h1>'
+// })
+
+router.get('/', index)
+
+module.exports = router
 
 /**
  * koa中间件与洋葱模型
@@ -96,49 +99,3 @@ const usersRouter = new Router({ prefix: '/users'});
 // usersRouter.delete('/:id', (ctx) => {
 //     ctx.status = 204
 // })
-
-/**
- * 利用内存数据库，实现用户的增删改查
- * 缺点：重启后数据失效
- */
-const db = [{name: "李雷"}]
-
-router.get('/', (ctx) => {
-    ctx.body = '<h1>这是首页</h1>'
-})
-
-usersRouter.get('/', (ctx) => {
-    ctx.set('Allow', 'GET, POST')
-    ctx.body = db
-})
-
-usersRouter.post('/', (ctx) => {
-    db.push(ctx.request.body)
-    ctx.body = ctx.request.body
-})
-
-usersRouter.get('/:id', (ctx) => {
-    ctx.body = db[ctx.params.id]
-})
-
-usersRouter.put('/:id', (ctx) => {
-    db[ctx.params.id] = ctx.request.body
-    ctx.body = ctx.request.body
-})
-
-usersRouter.delete('/:id', (ctx) => {
-    db.splice(ctx.params.id, 1)
-    ctx.status = 204
-})
-
-// body请求处理中间件
-app.use(bodyparser())
-
-// 路由配置
-app.use(router.routes())
-app.use(usersRouter.routes())
-
-// 响应options方法
-app.use(usersRouter.allowedMethods())
-
-app.listen(3000);
