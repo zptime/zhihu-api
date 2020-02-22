@@ -6,7 +6,24 @@ app.use(async (ctx, next)=>{
     console.log(1);
     await next();
     console.log(2);
-    ctx.body = 'Hello World, zhihu !';
+
+    if(ctx.url === '/'){
+        ctx.body = '这是主页'
+    } else if(ctx.url === '/users') {
+        if(ctx.method === 'POST'){
+            ctx.body = '这是用户列表页'
+        } else if(ctx.method === 'GET') {
+            ctx.body = '这是创建用户'
+        } else {
+            ctx.status = 405
+        }
+    } else if(ctx.url.match(/\/users\/\w+/)) {
+        const userId = ctx.url.match(/\/users\/(\w+)/)[1]
+        ctx.body = `这是用户 ${userId}`
+    } else {
+        ctx.status = 404
+    }
+    // ctx.body = 'Hello World, zhihu !';
 });
 
 app.use(async (ctx, next)=>{
