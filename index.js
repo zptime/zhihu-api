@@ -1,5 +1,6 @@
 const Koa = require('koa');
 const Router = require('koa-router');
+const bodyparser = require('koa-bodyparser')
 
 const app = new Koa();
 const router = new Router();
@@ -79,11 +80,23 @@ usersRouter.post('/', auth, (ctx) => {
     ctx.body = '创建用户'
 })
 
-usersRouter.get('/:id', auth, (ctx) => {
+// usersRouter.get('/:id', auth, (ctx) => {
+//     ctx.body = `这是用户 ${ctx.params.id}`
+// })
+
+usersRouter.get('/:id', (ctx) => {
     ctx.body = `这是用户 ${ctx.params.id}`
 })
 
+usersRouter.put('/:id', (ctx) => {
+    ctx.body = `这是新增用户 ${ctx.params.id}`
+})
+
+app.use(bodyparser())
 app.use(router.routes())
 app.use(usersRouter.routes())
+
+// 响应options方法
+app.use(usersRouter.allowedMethods())
 
 app.listen(3000);
