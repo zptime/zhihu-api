@@ -7,7 +7,9 @@ const router = new Router();
 // 前缀实现
 const usersRouter = new Router({ prefix: '/users'});
 
-// -----koa中间件与洋葱模型-----
+/**
+ * koa中间件与洋葱模型
+ */
 // app.use(async (ctx, next)=>{
 //     console.log(1);
 //     await next();
@@ -25,7 +27,10 @@ const usersRouter = new Router({ prefix: '/users'});
 //     console.log(5);
 // });
 
-// -----自定义路由中间件-----
+
+/**
+ * 自定义路由中间件
+ */
 // app.use(async (ctx, next)=>{
 //     if(ctx.url === '/'){
 //         ctx.body = '这是主页'
@@ -45,54 +50,91 @@ const usersRouter = new Router({ prefix: '/users'});
 //     }
 // });
 
-// -----koa-router实现路由-----
-// npm i koa-router --save
+
+/**
+ * koa-router实现路由
+ * npm i koa-router --save
+ */
 
 // 多中间件用法
-const auth = async (ctx, next) => {
-    if(ctx.url !== '/users'){
-        ctx.throw(401)
-    }
-    await next()
-}
+// const auth = async (ctx, next) => {
+//     if(ctx.url !== '/users'){
+//         ctx.throw(401)
+//     }
+//     await next()
+// }
 
-router.get('/', (ctx) => {
-    ctx.body = '这是主页'
-})
+// router.get('/', (ctx) => {
+//     ctx.set('Allow', 'GET, POST')
+//     ctx.body = '<h1>这是主页</h1>'
+// })
 
-// router.get('/users', (ctx) => {
+// // router.get('/users/:id', (ctx) => {
+// //     ctx.body = `这是用户 ${ctx.params.id}`
+// // })
+
+// usersRouter.get('/', auth, (ctx) => {
 //     ctx.body = '这是用户列表页'
 // })
 
-// router.post('/users', (ctx) => {
+// usersRouter.post('/', auth, (ctx) => {
 //     ctx.body = '创建用户'
 // })
 
-// router.get('/users/:id', (ctx) => {
+// // usersRouter.get('/:id', auth, (ctx) => {
+// //     ctx.body = `这是用户 ${ctx.params.id}`
+// // })
+
+// usersRouter.get('/:id', (ctx) => {
 //     ctx.body = `这是用户 ${ctx.params.id}`
 // })
 
-usersRouter.get('/', auth, (ctx) => {
-    ctx.body = '这是用户列表页'
-})
-
-usersRouter.post('/', auth, (ctx) => {
-    ctx.body = '创建用户'
-})
-
-// usersRouter.get('/:id', auth, (ctx) => {
-//     ctx.body = `这是用户 ${ctx.params.id}`
+// usersRouter.put('/:id', (ctx) => {
+//     ctx.body = { name: '李雷2'}
 // })
+
+// usersRouter.delete('/:id', (ctx) => {
+//     ctx.status = 204
+// })
+
+/**
+ * 利用内存数据库，实现用户的增删改查
+ * 缺点：重启后数据失效
+ */
+const db = [{name: "李雷"}]
+
+router.get('/', (ctx) => {
+    ctx.body = '<h1>这是首页</h1>'
+})
+
+usersRouter.get('/', (ctx) => {
+    ctx.set('Allow', 'GET, POST')
+    ctx.body = db
+})
+
+usersRouter.post('/', (ctx) => {
+    db.push(ctx.request.body)
+    ctx.body = ctx.request.body
+})
 
 usersRouter.get('/:id', (ctx) => {
-    ctx.body = `这是用户 ${ctx.params.id}`
+    ctx.body = db[ctx.params.id]
 })
 
 usersRouter.put('/:id', (ctx) => {
-    ctx.body = `这是新增用户 ${ctx.params.id}`
+    db[ctx.params.id] = ctx.request.body
+    ctx.body = ctx.request.body
 })
 
+usersRouter.delete('/:id', (ctx) => {
+    db.splice(ctx.params.id, 1)
+    ctx.status = 204
+})
+
+// body请求处理中间件
 app.use(bodyparser())
+
+// 路由配置
 app.use(router.routes())
 app.use(usersRouter.routes())
 
