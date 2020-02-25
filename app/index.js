@@ -2,9 +2,15 @@ const Koa = require('koa');
 const bodyparser = require('koa-bodyparser')
 const error = require('koa-json-error')
 const parameter = require('koa-parameter')
+const mongoose = require('mongoose')
+const { connectionStr } = require('./config')
 
 const app = new Koa();
 const routing = require('./routes')
+
+// 连接数据库
+mongoose.connect(connectionStr, { useUnifiedTopology: true, useNewUrlParser: true }, () => console.log('MongoDB 连接成功了！'))
+mongoose.connection.on('error', console.error)
 
 /**
  * 自定义错误处理中间件：放在所有中间件最前面，使用try,catch拦截错误
