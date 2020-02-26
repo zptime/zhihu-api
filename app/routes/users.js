@@ -1,5 +1,6 @@
 const Router = require('koa-router')
-const jwtwebtoken = require('jsonwebtoken')
+// const jwtwebtoken = require('jsonwebtoken')
+const jwt = require('koa-jwt')
 
 // 前缀实现
 const router = new Router({ prefix: '/users'})
@@ -10,21 +11,25 @@ const {
 
 const { secret } = require('../config')
 
-const auth = async (ctx, next) => {
-    const { authorization = '' } = ctx.request.header // =''：设置默认值，防止undefined时，replace函数报错
-    const token = authorization.replace('Bearer ', '')
+// 第三方认证koa-jwt
+const auth = jwt({ secret })
 
-    // 将所有错误均抛成401-未认证错误，message可能为未提供token，或者token不合法等等
-    try {
-        // verify函数可能会报各种错误
-        const user = jwtwebtoken.verify(token, secret)
-        // ctx.state：约定俗成放置用户相关的信息
-        ctx.state.user = user
-    } catch(err) {
-        ctx.throw(401, err.message)
-    }
-    await next() // 执行之后的中间件
-}
+// 自定义认证实现
+// const auth = async (ctx, next) => {
+//     const { authorization = '' } = ctx.request.header // =''：设置默认值，防止undefined时，replace函数报错
+//     const token = authorization.replace('Bearer ', '')
+
+//     // 将所有错误均抛成401-未认证错误，message可能为未提供token，或者token不合法等等
+//     try {
+//         // verify函数可能会报各种错误
+//         const user = jwtwebtoken.verify(token, secret)
+//         // ctx.state：约定俗成放置用户相关的信息
+//         ctx.state.user = user
+//     } catch(err) {
+//         ctx.throw(401, err.message)
+//     }
+//     await next() // 执行之后的中间件
+// }
 
 router.get('/', find)
 
