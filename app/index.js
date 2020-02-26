@@ -1,7 +1,10 @@
 const Koa = require('koa');
-const bodyparser = require('koa-bodyparser')
+// const bodyparser = require('koa-bodyparser')
+const koaBody = require('koa-body')
+const koaStatic = require('koa-static')
 const error = require('koa-json-error')
 const parameter = require('koa-parameter')
+const path = require('path')
 const mongoose = require('mongoose')
 const { connectionStr } = require('./config')
 
@@ -11,6 +14,9 @@ const routing = require('./routes')
 // 连接数据库
 mongoose.connect(connectionStr, { useUnifiedTopology: true, useNewUrlParser: true }, () => console.log('MongoDB 连接成功了！'))
 mongoose.connection.on('error', console.error)
+
+// koa-static：生成图片链接。静态处理文件一般放在最前面
+app.use(koaStatic(path.join(__dirname, 'public')))
 
 /**
  * 自定义错误处理中间件：放在所有中间件最前面，使用try,catch拦截错误
@@ -35,7 +41,17 @@ app.use(error({
 
 // koa本身无法处理body数据
 // koa-bodyparser：获取表单请求的数据，把koa2上下文的formData数据解析到ctx.request.body的中间件
-app.use(bodyparser())
+// app.use(bodyparser())
+
+// 使用koa-body替换koa-bodyparser，因为koa-bodyparser只支持json和form两种格式的请求体，不支持文件这种格式
+// koa-body：获取上传的文件
+app.use(koaBody({
+    multipart: true, // 启用文件
+    formidable: { // 是一个node npm 包，koa-body引用了这个包
+        uploadDir: path.join(__dirname, '/public/uploads'), // 上传目录
+        keepExtensions: true, // 保存扩展名
+    }
+}))
 
 // 通常用来校验请求体，放在请求体后面
 // 传入参数app，该中间件还有一个功能，可以在上下文(ctx)中加上一个方法，即全局方法，帮助校验
