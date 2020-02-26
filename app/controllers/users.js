@@ -69,6 +69,7 @@ class UsersCtl {
         }
         ctx.status = 204
     }
+    // 登录
     async login(ctx){
         ctx.verifyParams({
             name: { type: 'string', required: true },
@@ -83,6 +84,49 @@ class UsersCtl {
         const token = jwtwebtoken.sign({ _id, name }, secret, { expiresIn: '1d' }) // 过期时间，1天
         ctx.body = { token }
 
+    }
+    // 获取关注列表
+    async listFollowing(ctx) {
+        // select('+following')：获取到关注者列表，但全部是用户id。需要根据id来查询用户的具体信息
+        // 定义时，使用了ref:'User'，添加populate('following)，可以获取到具体的用户信息
+        const user = await User.findById(ctx.params.id).select('+following').populate('following')
+        if(!user){
+            ctx.throw(404, '用户不存在')
+        }
+        ctx.body = user.following
+    }
+    // 获取粉丝列表
+    async listFollowers(ctx) {
+        const users = await User.find({ following: ctx.params.id })
+        ctx.body = users
+    }
+    // 判断用户是否存在
+    async checkUserExist(ctx, next) {
+        const user = await User.findById(ctx.params.id)
+        if(!user) {
+            ctx.throw(404, '用户不存在')
+        }
+        await next()
+    }
+    // 关注功能
+    async follow(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+following')
+        // me.following里面的id是Scheme的字段类型，不能直接通过includes判断，需要转一下
+        if(!me.following.map(id => id.toString()).includes(ctx.params.id)){
+            me.following.push(ctx.params.id)
+            me.save()
+        }
+        ctx.status = 204
+    }
+    // 取消关注功能
+    async unfollow(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+following')
+        const index = me.following.map(id => id.toString()).indexOf(ctx.params.id)
+        if(index > -1){
+            me.following.splice(index, 1)
+            me.save()
+        }
+        ctx.status = 204
     }
 }
 
