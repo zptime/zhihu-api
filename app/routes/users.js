@@ -7,7 +7,10 @@ const router = new Router({ prefix: '/users'})
 const { 
     find, findById, create, update, delete: del, login, checkOwner,
     listFollowing, listFollowers, checkUserExist, follow, unfollow,
+    listFollowingTopics, followTopic, unfollowTopic,
 } = require('../controllers/users')
+
+const { checkTopicExist } = require('../controllers/topics')
 
 const { secret } = require('../config')
 
@@ -45,13 +48,17 @@ router.patch('/:id', auth, checkOwner, update)
 router.delete('/:id', auth, checkOwner, del)
 // 登录
 router.post('/login', login)
-// 获取关注人列表
+
+// 获取关注人列表；获取粉丝列表；关注；取消关注
 router.get('/:id/following', listFollowing)
-// 获取粉丝列表
 router.get('/:id/followers', listFollowers)
 // 关注：每个请求都携带token，可以知道具体是谁，不需要传当前用户id了。/following/:id（被关注人的id）
 router.put('/following/:id', auth, checkUserExist, follow)
-// 取消关注
 router.delete('/following/:id', auth, checkUserExist, unfollow)
+
+// 话题列表；关注话题；取消关注话题
+router.get('/:id/followingTopics', listFollowingTopics)
+router.put('/followingTopics/:id', auth, checkTopicExist, followTopic)
+router.delete('/followingTopics/:id', auth, checkTopicExist, unfollowTopic)
 
 module.exports = router
