@@ -38,10 +38,7 @@ class TopicsCtl {
         ctx.body = topic
     }
     async delete(ctx) { // 删除话题
-        const topic = await Topic.findByIdAndDelete(ctx.params.id)
-        if(!topic) {
-            ctx.throw(404, '话题不存在')
-        }
+        await Topic.findByIdAndRemove(ctx.params.id)
         ctx.status = 204
     }
     async update(ctx) { // 修改话题信息

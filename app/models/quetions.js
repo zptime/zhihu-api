@@ -1,5 +1,6 @@
 const mongoose = require('mongoose')
 mongoose.set('useFindAndModify', false)
+
 const { Schema, model } = mongoose
 
 const questionSchema = new Schema({
@@ -9,4 +10,4 @@ const questionSchema = new Schema({
     questioner: { type: Schema.Types.ObjectId, ref: 'User', required: true, select: false } // 提问者
 })
 
-module.export = model('Question', questionSchema)
+module.exports = model('Question', questionSchema)

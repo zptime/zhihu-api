@@ -43,6 +43,13 @@ const userSchema = new Schema({
             ref: 'Topic', // 代表该id和话题关联
         }],
         select: false
+    },
+    followingQuestions: { // 关注问题
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Question'
+        }],
+        select: false
     }
 })
 

@@ -1,8 +1,9 @@
 /**
  * 利用真实数据库，实现用户的增删改查
  */
-const User = require('../models/users')
 const jwtwebtoken = require('jsonwebtoken')
+const User = require('../models/users')
+const Question = require('../models/quetions')
 const { secret } = require('../config')
 
 class UsersCtl {
@@ -144,7 +145,7 @@ class UsersCtl {
         }
         ctx.status = 204
     }
-    // 获取话题列表
+    // 获取该用户话题列表
     async listFollowingTopics(ctx) {
         const user = await User.findById(ctx.params.id).select('+followingTopics').populate('followingTopics')
         if(!user){
@@ -167,6 +168,38 @@ class UsersCtl {
         const index = me.followingTopics.map(id => id.toString()).indexOf(ctx.params.id)
         if(index > -1){
             me.followingTopics.splice(index, 1)
+            me.save()
+        }
+        ctx.status = 204
+    }
+    // 获取该用户的问题列表，提问者为指定用户
+    async listQuestions(ctx) {
+        const questions = await Question.find({ questioner: ctx.params.id })
+        ctx.body = questions
+    }
+    // 问题的粉丝列表：获取关注该问题的用户列表
+    async listFollowingQuestions(ctx) {
+        const user = await User.findById(ctx.params.id).select('+followingQuestions').populate('followingQuestions')
+        if(!user) {
+            ctx.throw(404, '用户不存在')
+        }
+        ctx.body = user.followingQuestions
+    }
+    // 关注问题
+    async followQuestion(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+followingQuestions').populate('followingQuestions')
+        if(!me.followingQuestions.map(id => id.toString()).includes(ctx.params.id)) {
+            me.followingQuestions.push(ctx.params.id)
+            me.save()
+        }
+        ctx.status = 204
+    }
+    // 取消关注问题
+    async unfollowQuestion(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+followdingQuestions').populate('followingQuestions')
+        const index = me.followingQuestions.map(id => id.toString()).indexOf(ctx.params.id)
+        if(index > -1) {
+            me.followingQuestions.splice(index, 1)
             me.save()
         }
         ctx.status = 204
