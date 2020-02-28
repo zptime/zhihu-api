@@ -1,5 +1,6 @@
 const Topic = require('../models/topics')
 const User = require('../models/users')
+const Question = require('../models/questions')
 
 class TopicsCtl {
     async find(ctx) { // 获取话题列表
@@ -63,6 +64,10 @@ class TopicsCtl {
     async listTopicFollowers(ctx) { // 获取话题粉丝列表，即关注话题的用户列表
         const users = await User.find({ followingTopics: ctx.params.id })
         ctx.body = users
+    }
+    async listTopicQuestions(ctx) { // 话题的问题列表
+        const questions = await Question.find({ topics: ctx.params.id })
+        ctx.body = questions
     }
 }
 

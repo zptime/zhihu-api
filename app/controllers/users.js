@@ -3,7 +3,7 @@
  */
 const jwtwebtoken = require('jsonwebtoken')
 const User = require('../models/users')
-const Question = require('../models/quetions')
+const Question = require('../models/questions')
 const { secret } = require('../config')
 
 class UsersCtl {

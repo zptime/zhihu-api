@@ -1,7 +1,7 @@
-const Question = require('../models/quetions')
+const Question = require('../models/questions')
 const User = require('../models/users')
 
-class QuetionsCtl {
+class QuestionsCtl {
     async create(ctx) { // 新增
         ctx.verifyParams({
             title: { type: 'string', required: true },
@@ -12,8 +12,8 @@ class QuetionsCtl {
         ctx.body = question
     }
     async delete(ctx) { // 删除
-        await Question.findByIdAndRemove(ctx.query.id)
-        ctx.throw(204)
+        await Question.findByIdAndRemove(ctx.params.id)
+        ctx.status = 204
     }
     async find(ctx) { // 查询问题列表
         const { per_page = 10 } = ctx.query
@@ -30,7 +30,8 @@ class QuetionsCtl {
     async findById(ctx) { // 查询某个问题信息
         const { fields } = ctx.query
         const selectfields = fields.split(';').filter(f => f).map(f => ' +' + f).join('')
-        const question = await Question.findById(ctx.params.id).select(selectfields).populate('questioner')
+        // populate('topics')：获取问题的话题列表
+        const question = await Question.findById(ctx.params.id).select(selectfields).populate('questioner topics')
         if(!question){
             ctx.throw(404, '问题不存在')
         }
@@ -53,7 +54,7 @@ class QuetionsCtl {
     async checkQuestioner(ctx, next) { // 检查是否是提问者，只有自己可以处理自己的
         const { question } = ctx.state
         if(question.questioner.toString() !== ctx.state.user._id){
-            throw(403, '没有权限')
+            ctx.throw(403, '没有权限')
         }
         await next()
     }
@@ -71,4 +72,4 @@ class QuetionsCtl {
     }
 }
 
-module.exports = new QuetionsCtl()
+module.exports = new QuestionsCtl()
