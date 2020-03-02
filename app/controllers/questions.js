@@ -1,5 +1,4 @@
 const Question = require('../models/questions')
-const User = require('../models/users')
 
 class QuestionsCtl {
     async create(ctx) { // 新增
@@ -65,10 +64,6 @@ class QuestionsCtl {
         }
         ctx.state.question = question
         await next()
-    }
-    async listQuestionFollowers(ctx) { // 问题的粉丝列表
-        const users = await User.find({ followingQuestions: ctx.params.id })
-        ctx.body = users
     }
 }
 

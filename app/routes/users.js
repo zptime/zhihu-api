@@ -9,10 +9,13 @@ const {
     listFollowing, listFollowers, checkUserExist, follow, unfollow,
     listFollowingTopics, followTopic, unfollowTopic,
     listQuestions, listFollowingQuestions, followQuestion, unfollowQuestion, 
+    listLikingAnswers, likeAnswer, unlikeAnswer, listDislikingAnswers, dislikeAnswer, undislikeAnswer,
+    listCollectingAnswers, collectAnswer, uncollectAnswer
 } = require('../controllers/users')
 
 const { checkTopicExist } = require('../controllers/topics')
 const { checkQuestionExist } = require('../controllers/questions')
+const { checkAnswerExist } = require('../controllers/answers')
 
 const { secret } = require('../config')
 
@@ -68,6 +71,19 @@ router.get('/:id/questions', listQuestions)
 router.get('/:id/followingQuestions', listFollowingQuestions)
 router.put('/followingQuestions/:id', auth, checkQuestionExist, followQuestion)
 router.delete('/followingQuestions/:id', auth, checkQuestionExist, unfollowQuestion)
+
+// 赞（答案）列表；赞；取消赞；踩列表；踩；取消踩
+router.get('/:id/likingAnswers', listLikingAnswers)
+router.put('/likingAnswers/:id', auth, checkAnswerExist, likeAnswer, undislikeAnswer) // 互斥关系，赞的时候取消踩
+router.delete('/likingAnswers/:id', auth, checkAnswerExist, unlikeAnswer)
+router.get('/:id/dislikingAnswers', listDislikingAnswers)
+router.put('/dislikingAnswers/:id', auth, checkAnswerExist, dislikeAnswer, unlikeAnswer) // 互斥关系，踩的时候取消赞
+router.delete('/dislikingAnswers/:id', auth, checkAnswerExist, undislikeAnswer)
+
+// 收藏（答案）列表；收藏；取消收藏
+router.get('/:id/collectingAnswers', listCollectingAnswers)
+router.put('/collectingAnswers/:id', auth, checkAnswerExist, collectAnswer)
+router.delete('/collectingAnswers/:id', auth, checkAnswerExist, uncollectAnswer)
 
 
 module.exports = router

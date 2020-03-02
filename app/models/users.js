@@ -50,6 +50,27 @@ const userSchema = new Schema({
             ref: 'Question'
         }],
         select: false
+    },
+    likingAnswers: { // 赞（答案）
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Answer'
+        }],
+        select: false
+    },
+    dislikingAnswers: { // 踩（答案）
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Answer'
+        }],
+        select: false
+    },
+    collectingAnswers: { // 收藏（答案）
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Answer'
+        }],
+        select: false
     }
 })
 

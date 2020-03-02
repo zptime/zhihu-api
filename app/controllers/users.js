@@ -4,6 +4,7 @@
 const jwtwebtoken = require('jsonwebtoken')
 const User = require('../models/users')
 const Question = require('../models/questions')
+const Answer = require('../models/answers')
 const { secret } = require('../config')
 
 class UsersCtl {
@@ -86,6 +87,7 @@ class UsersCtl {
         }
         ctx.status = 204
     }
+
     // 登录
     async login(ctx){
         ctx.verifyParams({
@@ -102,6 +104,7 @@ class UsersCtl {
         ctx.body = { token }
 
     }
+
     // 获取关注列表
     async listFollowing(ctx) {
         // select('+following')：获取到关注者列表，但全部是用户id。需要根据id来查询用户的具体信息
@@ -145,6 +148,7 @@ class UsersCtl {
         }
         ctx.status = 204
     }
+
     // 获取该用户话题列表
     async listFollowingTopics(ctx) {
         const user = await User.findById(ctx.params.id).select('+followingTopics').populate('followingTopics')
@@ -172,6 +176,7 @@ class UsersCtl {
         }
         ctx.status = 204
     }
+
     // 获取该用户的问题列表，提问者为指定用户
     async listQuestions(ctx) {
         const questions = await Question.find({ questioner: ctx.params.id })
@@ -200,6 +205,95 @@ class UsersCtl {
         const index = me.followingQuestions.map(id => id.toString()).indexOf(ctx.params.id)
         if(index > -1) {
             me.followingQuestions.splice(index, 1)
+            me.save()
+        }
+        ctx.status = 204
+    }
+
+    // 获取该用户的赞列表
+    async listLikingAnswers(ctx) {
+        const user = await User.findById(ctx.params.id).select('+likingAnswers').populate('likingAnswers')
+        if(!user){
+            ctx.throw(404, '用户不存在')
+        }
+        ctx.body = user.likingAnswers
+    }
+    // 赞
+    async likeAnswer(ctx, next) {
+        const me = await User.findById(ctx.state.user._id).select('+likingAnswers')
+        if(!me.likingAnswers.map(id => id.toString()).includes(ctx.params.id)){
+            me.likingAnswers.push(ctx.params.id)
+            me.save()
+            // $inc：投票数加1（increase）
+            await Answer.findByIdAndUpdate(ctx.params.id, { $inc: { voteCount: 1 } })
+        }
+        ctx.status = 204
+        await next() // 互斥关系需要，接入下一个中间件
+    }
+    // 取消赞
+    async unlikeAnswer(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+likingAnswers')
+        const index = me.likingAnswers.map(id => id.toString()).indexOf(ctx.params.id)
+        if(index > -1){
+            me.likingAnswers.splice(index, 1)
+            me.save()
+            await Answer.findByIdAndUpdate(ctx.params.id, { $inc: { voteCount: -1 } })
+        }
+        ctx.status = 204
+    }
+    // 获取该用户的踩列表
+    async listDislikingAnswers(ctx) {
+        const user = await User.findById(ctx.params.id).select('+dislikingAnswers').populate('dislikingAnswers')
+        if(!user){
+            ctx.throw(404, '用户不存在')
+        }
+        ctx.body = user.dislikingAnswers
+    }
+    // 踩
+    async dislikeAnswer(ctx, next) {
+        const me = await User.findById(ctx.state.user._id).select('+dislikingAnswers')
+        if(!me.dislikingAnswers.map(id => id.toString()).includes(ctx.params.id)){
+            me.dislikingAnswers.push(ctx.params.id)
+            me.save()
+        }
+        ctx.status = 204
+        await next()
+    }
+    // 取消踩
+    async undislikeAnswer(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+dislikingAnswers')
+        const index = me.dislikingAnswers.map(id => id.toString()).indexOf(ctx.params.id)
+        if(index > -1){
+            me.dislikingAnswers.splice(index, 1)
+            me.save()
+        }
+        ctx.status = 204
+    }
+
+    // 获取该用户的收藏答案列表
+    async listCollectingAnswers(ctx) {
+        const user = await User.findById(ctx.params.id).select('+collectingAnswers').populate('collectingAnswers')
+        if(!user){
+            ctx.throw(404, '用户不存在')
+        }
+        ctx.body = user.collectingAnswers
+    }
+    // 收藏（答案）
+    async collectAnswer(ctx, next) {
+        const me = await User.findById(ctx.state.user._id).select('+collectingAnswers')
+        if(!me.collectingAnswers.map(id => id.toString()).includes(ctx.params.id)){
+            me.collectingAnswers.push(ctx.params.id)
+            me.save()
+        }
+        ctx.status = 204
+        await next()
+    }
+    // 取消收藏（答案）
+    async uncollectAnswer(ctx) {
+        const me = await User.findById(ctx.state.user._id).select('+collectingAnswers')
+        const index = me.collectingAnswers.map(id => id.toString()).indexOf(ctx.params.id)
+        if(index > -1){
+            me.collectingAnswers.splice(index, 1)
             me.save()
         }
         ctx.status = 204
