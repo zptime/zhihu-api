@@ -71,8 +71,22 @@ const userSchema = new Schema({
             ref: 'Answer'
         }],
         select: false
-    }
-})
+    },
+    likingComments: { // 赞（评论）
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Comment'
+        }],
+        select: false
+    },
+    dislikingComments: { // 踩（评论）
+        type: [{
+            type: Schema.Types.ObjectId,
+            ref: 'Comment'
+        }],
+        select: false
+    },
+}, { timestamps: true })
 
 // 参数一：文档集合名称；参数二：Schema
 module.exports = model('User', userSchema)

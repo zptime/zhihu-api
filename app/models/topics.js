@@ -8,6 +8,6 @@ const topicSchema = new Schema({
     name: { type: String, required: true}, // 名称
     avatar_url: { type: String }, // 头像，话题图标
     introduction: { type: String, select: false }, // 简介
-})
+}, { timestamps: true })
 
 module.exports = model('Topic', topicSchema)

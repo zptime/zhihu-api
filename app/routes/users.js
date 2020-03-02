@@ -10,12 +10,14 @@ const {
     listFollowingTopics, followTopic, unfollowTopic,
     listQuestions, listFollowingQuestions, followQuestion, unfollowQuestion, 
     listLikingAnswers, likeAnswer, unlikeAnswer, listDislikingAnswers, dislikeAnswer, undislikeAnswer,
-    listCollectingAnswers, collectAnswer, uncollectAnswer
+    listCollectingAnswers, collectAnswer, uncollectAnswer,
+    listLikingComments, likeComment, unlikeComment, listDislikingComments, dislikeComment, undislikeComment,
 } = require('../controllers/users')
 
 const { checkTopicExist } = require('../controllers/topics')
 const { checkQuestionExist } = require('../controllers/questions')
 const { checkAnswerExist } = require('../controllers/answers')
+const { checkCommentExist } = require('../controllers/comments')
 
 const { secret } = require('../config')
 
@@ -84,6 +86,14 @@ router.delete('/dislikingAnswers/:id', auth, checkAnswerExist, undislikeAnswer)
 router.get('/:id/collectingAnswers', listCollectingAnswers)
 router.put('/collectingAnswers/:id', auth, checkAnswerExist, collectAnswer)
 router.delete('/collectingAnswers/:id', auth, checkAnswerExist, uncollectAnswer)
+
+// 赞（评论）列表；赞；取消赞；踩列表；踩；取消踩
+router.get('/:id/likingComments', listLikingComments)
+router.put('/likingComments/:id', auth, checkCommentExist, likeComment, undislikeComment)
+router.delete('/likingComments/:id', auth, checkCommentExist, unlikeComment)
+router.get('/:id/dislikingComments', listDislikingComments)
+router.put('/dislikingComments/:id', auth, checkCommentExist, dislikeComment, unlikeComment)
+router.delete('/dislikingComments/:id', auth, checkCommentExist, undislikeComment)
 
 
 module.exports = router

@@ -1,6 +1,7 @@
 const Router = require('koa-router')
 const jwt = require('koa-jwt')
 
+// 二级嵌套路由
 const router = new Router({ prefix: '/questions/:questionId/answers' })
 const {
     create, delete: del , find, findById, update,

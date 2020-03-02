@@ -15,6 +15,6 @@ const questionSchema = new Schema({
         }],
         select: false
     }
-})
+}, { timestamps: true })
 
 module.exports = model('Question', questionSchema)
